@@ -1,0 +1,25 @@
+{
+  "name": "employ-ease",
+  "version": "1.0.0",
+  "description": "A CLI solution for managing a company's employees organization and roles",
+  "main": "employeeDB.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/keycole/employ-ease.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/keycole/employ-ease/issues"
+  },
+  "homepage": "https://github.com/keycole/employ-ease#readme",
+  "dependencies": {
+    "console.table": "^0.10.0",
+    "dotenv": "^8.2.0",
+    "inquirer": "^7.3.3",
+    "mysql": "^2.18.1"
+  }
+}
