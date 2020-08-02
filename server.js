@@ -1,7 +1,6 @@
 //Define module dependencies
 const mysql = require('mysql');
 const inquirer = require('inquirer');
-const cTable = require('console.table');
 const eTable = require('easy-table');
 const dotenv = require('dotenv').config();
 const chalk = require('chalk');
@@ -20,6 +19,7 @@ let employeeRoleID;
 let employeeManagerID;
 let employeeObjArray = [];
 let employeeArray = [];
+let employeeTargetID;
 
 //Create connection
 const connection = mysql.createConnection({
@@ -119,7 +119,7 @@ const getManagerID = (answers) => {
       return employeeManagerID;
     }
   };
-}
+};
 
 // ++++ ADD FUNCTIONS ++++
 //Add Department - verified
@@ -135,10 +135,10 @@ const addDepartment = () => {
     });
 };
 //Add Role - verified
-const addRole = async () => {
+const addRole = () => {
   try{
     allDepartments();
-    await inquirer.prompt([
+    inquirer.prompt([
       {
         name: "roleTitle",
         type: "input",
@@ -151,11 +151,11 @@ const addRole = async () => {
       },
       {
         name: "roleDepartment",
-        type: "list",
+        type: "rawlist",
         message: "What department does the new role belong to?",
         choices: deptArray
       }
-    ]).then(async function(answers){
+    ]).then(function(answers){
       getDeptID(answers);
 
       connection.query('INSERT INTO role SET ?', 
@@ -209,7 +209,7 @@ const addEmployee = () => {
           return answers.hasManager;
         }
       }])
-      .then(async function(answers){
+      .then(function(answers){
         getRoleID(answers);
 
         if(answers.hasManager){
@@ -234,22 +234,69 @@ const addEmployee = () => {
 };
 
 // (*)-(*) VIEW FUNCTIONS (*)-(*)
-const viewDepartments = () => {
-
+  //View all departments - verified
+const viewDepartments = async () => {
+    connection.query(
+      'SELECT * from department', function(err,res){
+        
+        let t = new eTable;
+        
+        res.forEach(function(item) {
+          t.cell('ID', item.id);
+          t.cell('Department Name', item.name);
+          t.newRow();
+        });
+        
+        console.log(t.toString());
+        runRequest();
+      });
 };
-
+  //View all roles - verified
 const viewRoles = () => {
+    connection.query(
+      'SELECT * from role', function(err,res){
+        
+        let t = new eTable;
+        
+        res.forEach(function(role) {
+          t.cell('ID', role.id);
+          t.cell('Role Title', role.title);
+          t.cell('Salary', role.salary);
+          t.cell('Department ID', role.department_id);
+          t.newRow();
+        });
+        
+        console.log(t.toString());
+        runRequest();
+      });
   
 };
-
+  //View all employees - verified
 const viewEmployees = () => {
+    connection.query(
+      'SELECT * from employee ', function(err,res){
+        
+        let t = new eTable;
+        
+        res.forEach(function(employee) {
+          t.cell('ID', employee.id);
+          t.cell('First Name', employee.first_name);
+          t.cell('Last Name', employee.last_name);
+          t.cell('Role ID', employee.role_id);
+          t.cell('Manager ID', employee.manager_id);
+          t.newRow();
+        });
+        
+        console.log(t.toString());
+        runRequest();
+      });
   
 };
 
 // ^^^^ UPDATE FUNCTIONS ^^^^
 const updateEmployeeRole = () => {
-
-};
+    
+  };
 
 const updateEmployeeManager = () => {
 
@@ -373,18 +420,18 @@ connection.connect(function(err) {
         }
       ])
       .then(function(answer) {
-        console.log(infoStyle(`OK. You would like to: ${answer.category}`));
+        console.log(infoStyle(`OK. You would like to: ${answer.category}`, `\n`, `--------------------------------------------------------`));
 
         switch (answer.category) {
-          case "Add a Department":
+          case "View all Departments":
             viewDepartments();
             break;
     
-          case "Add a Role":
+          case "View all Roles":
             viewRoles();
             break;
     
-          case "Add an Employee":
+          case "View all Employees":
             viewEmployees();
             break;
 
@@ -415,6 +462,7 @@ connection.connect(function(err) {
 
         switch (answer.category) {
           case "Update employee role":
+            allEmployees();
             updateEmployeeRole();
             break;
     
