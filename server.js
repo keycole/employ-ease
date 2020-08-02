@@ -4,7 +4,6 @@ const inquirer = require('inquirer');
 const cTable = require('console.table');
 const dotenv = require('dotenv').config();
 const chalk = require('chalk');
-const util = require('util');
 
 //Define console.log text styles
 const welcomeStyle = chalk.bold.cyanBright;
@@ -13,6 +12,7 @@ const infoStyle = chalk.yellowBright;
 //Define variables that need to be accessed outside of functions
 const deptArray = [];
 const deptObjArray = [];
+let thisRoleID;
 
 //Create connection
 const connection = mysql.createConnection({
@@ -27,15 +27,11 @@ const connection = mysql.createConnection({
     database: 'employee_DB'
 });
 
-//Promisity connection where needed
-const promisifiedQuery = util.promisify(connection.query);
-
 //Function to quit out of the application when "Exit Application" is selected
 const endApplication = () => {
   console.log(welcomeStyle('We hope you were able to take care of everything you needed.','\n','2 cents before you go: “Strive not to be a success, but rather to be of value.” – Albert Einstein'));
   connection.end();
 };
-
 
 //** ! SERVER FUNCTIONS ! **//
 //Helper functions to get shared information from other tables:
@@ -54,10 +50,12 @@ const getDeptID = (answers) => {
   console.log('The getDeptID function has been entered.')
   for(let item of deptObjArray){
     if(item.name == answers.roleDepartment){
+      console.log(`item name = ${item.name}`);
       thisRoleID = item.id;
       return thisRoleID;
     }
   };
+  console.log(`thisRoleID = ${thisRoleID}`);
 };
 
 
@@ -97,24 +95,18 @@ const addRole = async () => {
         choices: deptArray
       }
     ]).then(async function(answers){
+      getDeptID(answers);
+      console.log(`The answers.roleDepartment = ${answers.roleDepartment}`)
       console.log(`The deptArray = ${deptArray}`);
-      console.log(`The answers are ${JSON.stringify(answers)}`);
-      // try{
-      //   let thisRoleID;
-      //   getDeptID();
+      console.log(`The answers are ${JSON.stringify(answers)}; thisRoleID = ${thisRoleID}`);
 
-      //   await promisifiedQuery('INSERT INTO role SET ?', 
-      //   {
-      //     title: answers.roleTitle,
-      //     salary: answers.roleSalary,
-      //     department_id: thisRoleID
-      //   });
-      //   console.log(infoStyle(`Success! Your new role has been added to the database`));
-      // }catch(err){
-      //   if(err){
-      //     throw err;
-      //   }
-      // };
+      connection.query('INSERT INTO role SET ?', 
+        {
+          title: answers.roleTitle,
+          salary: answers.roleSalary,
+          department_id: thisRoleID
+        });
+        console.log(infoStyle(`Success! Your new role has been added to the database`));
     });
     } catch(err) {
       if(err){
