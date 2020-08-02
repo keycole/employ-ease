@@ -2,6 +2,7 @@
 const mysql = require('mysql');
 const inquirer = require('inquirer');
 const cTable = require('console.table');
+const eTable = require('easy-table');
 const dotenv = require('dotenv').config();
 const chalk = require('chalk');
 
@@ -15,7 +16,8 @@ let deptObjArray = [];
 let thisRoleID;
 let roleObjArray = [];
 let roleArray = [];
-let thisEmployeeRoleID;
+let employeeRoleID;
+let employeeManagerID;
 let employeeObjArray = [];
 let employeeArray = [];
 
@@ -34,12 +36,17 @@ const connection = mysql.createConnection({
 
 //Function to quit out of the application when "Exit Application" is selected
 const endApplication = () => {
-  console.log(welcomeStyle('We hope you were able to take care of everything you needed.','\n','2 cents before you go: “Strive not to be a success, but rather to be of value.” – Albert Einstein'));
+  console.log(welcomeStyle(' ------------------------------------------------------------','\n','We hope you were able to take care of everything you needed.','\n','2 cents before you go: “Strive not to be a success, but rather to be of value.” – Albert Einstein', '\n', '------------------------------------------------------------'));
   connection.end();
 };
 
-//** ! SERVER FUNCTIONS ! **//
+//-------------------------------------------------------------------------//
+  /////////////////////////  SERVER   FUNCTIONS  /////////////////////////
+//-------------------------------------------------------------------------//
+
 //Helper functions to get shared information from other tables:
+  //Grab all departments
+  //Saves an array of complete dept objects, and an array of dept names
 const allDepartments = () => {
   deptObjArray = [];
   deptArray = [];
@@ -53,6 +60,7 @@ const allDepartments = () => {
       } 
   )};
 
+  //Matches the department id to the role
 const getDeptID = (answers) => {
   for(let item of deptObjArray){
     if(item.name == answers.roleDepartment){
@@ -61,7 +69,8 @@ const getDeptID = (answers) => {
     }
   };
 };
-
+  //Grab all roles
+  //Saves an array of complete role objects, and an array of role titles
 const allRoles = () => {
   roleObjArray = [];
   roleArray = [];
@@ -75,6 +84,8 @@ const allRoles = () => {
   } 
 )};
 
+  //Grab all Employees
+  //Saves an array of complete employee objects, and an array of employee names
 const allEmployees = () => {
   employeeObjArray = [];
   employeeArray = [];
@@ -89,6 +100,7 @@ const allEmployees = () => {
     });
 };
 
+  //Matches the role id to the employee
 const getRoleID = (answers) => {
   for(let item of roleObjArray){
     if(item.title == answers.employeeDepartment){
@@ -98,6 +110,7 @@ const getRoleID = (answers) => {
   };
 };
 
+  //Assigns a manager's employee id to an employee's manager_id
 const getManagerID = (answers) => {
   for(let item of employeeObjArray){
     let thisName = item.first_name + ' ' + item.last_name;
@@ -108,7 +121,7 @@ const getManagerID = (answers) => {
   };
 }
 
-//ADD FUNCTIONS
+// ++++ ADD FUNCTIONS ++++
 //Add Department - verified
 const addDepartment = () => {
     inquirer.prompt({
@@ -160,7 +173,7 @@ const addRole = async () => {
       }
     }; 
 };
-//Add Employee
+//Add Employee - verified
 const addEmployee = () => {
   try{
     allEmployees();
@@ -220,7 +233,33 @@ const addEmployee = () => {
     }; 
 };
 
-//After connection is made, console.log application info and summary
+// (*)-(*) VIEW FUNCTIONS (*)-(*)
+const viewDepartments = () => {
+
+};
+
+const viewRoles = () => {
+  
+};
+
+const viewEmployees = () => {
+  
+};
+
+// ^^^^ UPDATE FUNCTIONS ^^^^
+const updateEmployeeRole = () => {
+
+};
+
+const updateEmployeeManager = () => {
+
+};
+
+//-------------------------------------------------------------------------//
+  /////////////////////////  INITIAL  FUNCTIONS  /////////////////////////
+//-------------------------------------------------------------------------//
+
+//After initial connection is made, console.log application info and summary
 //Start function containing inquirer prompts
 connection.connect(function(err) {
     if (err) throw err;
