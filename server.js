@@ -4,10 +4,15 @@ const inquirer = require('inquirer');
 const cTable = require('console.table');
 const dotenv = require('dotenv').config();
 const chalk = require('chalk');
+const util = require('util');
 
 //Define console.log text styles
 const welcomeStyle = chalk.bold.cyanBright;
 const infoStyle = chalk.yellowBright;
+
+//Define variables that need to be accessed outside of functions
+const deptArray = [];
+const deptObjArray = [];
 
 //Create connection
 const connection = mysql.createConnection({
@@ -22,6 +27,9 @@ const connection = mysql.createConnection({
     database: 'employee_DB'
 });
 
+//Promisity connection where needed
+const promisifiedQuery = util.promisify(connection.query);
+
 //Function to quit out of the application when "Exit Application" is selected
 const endApplication = () => {
   console.log(welcomeStyle('We hope you were able to take care of everything you needed.','\n','2 cents before you go: “Strive not to be a success, but rather to be of value.” – Albert Einstein'));
@@ -30,20 +38,90 @@ const endApplication = () => {
 
 
 //** ! SERVER FUNCTIONS ! **//
-  const addDepartment = () => {
+//Helper functions to get shared information from other tables:
+const allDepartments = () => {
+  connection.query(
+      "SELECT * from department", function(err, res){
+        for(const department of res){
+          deptObjArray.push(department);
+          deptArray.push(department.name);
+        }
+        return(deptObjArray, deptArray);
+      } 
+  )};
+
+const getDeptID = (answers) => {
+  console.log('The getDeptID function has been entered.')
+  for(let item of deptObjArray){
+    if(item.name == answers.roleDepartment){
+      thisRoleID = item.id;
+      return thisRoleID;
+    }
+  };
+};
+
+
+//ADD FUNCTIONS
+//Add Department
+const addDepartment = () => {
     console.log('The add department function has been entered.');
     inquirer.prompt({
         name: 'newDepartment',
          type: 'input',
          message: 'What is the name of the department that you would like to add?'
     }).then((answers) => {
-        //Test 
         connection.query("INSERT INTO department SET ?", {name: answers.newDepartment});
         console.log(infoStyle(`Success! Your new department has been added to the database`));
         runRequest();
     });
 };
+//Add Role
+const addRole = async () => {
+  try{
+    allDepartments();
+    await inquirer.prompt([
+      {
+        name: "roleTitle",
+        type: "input",
+        message: "Please enter the new role title."
+      },
+      {
+        name: "roleSalary",
+        type: "input",
+        message: "Please enter the new role salary."
+      },
+      {
+        name: "roleDepartment",
+        type: "rawlist",
+        message: "Please enter the new role salary.",
+        choices: deptArray
+      }
+    ]).then(async function(answers){
+      console.log(`The deptArray = ${deptArray}`);
+      console.log(`The answers are ${JSON.stringify(answers)}`);
+      // try{
+      //   let thisRoleID;
+      //   getDeptID();
 
+      //   await promisifiedQuery('INSERT INTO role SET ?', 
+      //   {
+      //     title: answers.roleTitle,
+      //     salary: answers.roleSalary,
+      //     department_id: thisRoleID
+      //   });
+      //   console.log(infoStyle(`Success! Your new role has been added to the database`));
+      // }catch(err){
+      //   if(err){
+      //     throw err;
+      //   }
+      // };
+    });
+    } catch(err) {
+      if(err){
+        throw err;
+      }
+    }; 
+};
 
 //After connection is made, console.log application info and summary
 //Start function containing inquirer prompts
