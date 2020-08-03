@@ -353,7 +353,7 @@ const viewRoles = () => {
 //View all employees - verified
 const viewEmployees = () => {
   connection.query(
-    'SELECT * from employee ', function (err, res) {
+    'SELECT * from employee LEFT JOIN role ON employee.role_id = role.id LEFT JOIN department ON role.department_id = department.id', function (err, res) {
 
       let t = new eTable;
 
@@ -361,7 +361,9 @@ const viewEmployees = () => {
         t.cell('ID', employee.id);
         t.cell('First Name', employee.first_name);
         t.cell('Last Name', employee.last_name);
-        t.cell('Role ID', employee.role_id);
+        t.cell('Role', employee.title);
+        t.cell('Department', employee.name);
+        t.cell('Salary', employee.salary);
         t.cell('Manager ID', employee.manager_id);
         t.newRow();
       });
