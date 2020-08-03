@@ -332,7 +332,7 @@ const viewDepartments = async () => {
 //View all roles - verified
 const viewRoles = () => {
   connection.query(
-    'SELECT * from role', function (err, res) {
+    'SELECT * from role LEFT JOIN department ON role.department_id = department.id', function (err, res) {
 
       let t = new eTable;
 
@@ -340,13 +340,13 @@ const viewRoles = () => {
         t.cell('ID', role.id);
         t.cell('Role Title', role.title);
         t.cell('Salary', role.salary);
-        t.cell('Department ID', role.department_id);
+        t.cell('Department', role.name);
         t.newRow();
       });
 
       console.log(t.toString());
       runRequest();
-    });
+   });
 
 };
 
