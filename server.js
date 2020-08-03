@@ -16,6 +16,7 @@ let thisRoleID;
 let roleObjArray = [];
 let roleArray = [];
 let employeeRoleID;
+let managerObjArray = [];
 let employeeManagerID;
 let employeeObjArray = [];
 let employeeArray = [];
@@ -137,6 +138,20 @@ const getManagerID = (answers) => {
   };
 };
 
+//Create an array of Manager objects
+const managerIdArray = () => {
+  managerObjArray = [];
+  connection.query("SELECT * from employee", function(err, res){
+    for(let employee of res){
+      let employeeIdPair = {'name': '' , 'id': ''};
+      employeeIdPair.name = employee.first_name + ' ' + employee.last_name;
+      employeeIdPair.id = employee.id;
+      managerObjArray.push(employeeIdPair);
+    }
+    return managerObjArray;
+  });
+};
+
 //Get updated employee's ID - verified
 const getUpdatedEmployeeID = (answers) => {
   let thisName = answers.selectedEmployee.split(' ');
@@ -145,8 +160,8 @@ const getUpdatedEmployeeID = (answers) => {
       thisEmployeeID = employee.id;
       return thisEmployeeID;
     }
-  }
-}
+  };
+};
 
 //Function to send employee updates to the server (Update employee function below) - verified
 const sendUpdatedEmployee = (query, data) => {
@@ -163,7 +178,7 @@ const sendUpdatedEmployee = (query, data) => {
         if(err){
           throw err;
       }
-    } 
+    }; 
 };
 
 //Update employee function - verified
@@ -314,7 +329,7 @@ const addEmployee = () => {
 //View all departments - verified
 const viewDepartments = async () => {
   connection.query(
-    'SELECT * from department', function (err, res) {
+    'SELECT * from employee_DB.department', function (err, res) {
 
       let t = new eTable;
 
@@ -332,7 +347,7 @@ const viewDepartments = async () => {
 //View all roles - verified
 const viewRoles = () => {
   connection.query(
-    'SELECT * from role LEFT JOIN department ON role.department_id = department.id', function (err, res) {
+    'SELECT employee_DB.role.id, employee_DB.role.title, employee_DB.role.salary, employee_DB.department.name from employee_DB.role LEFT JOIN employee_DB.department ON employee_DB.role.department_id = employee_DB.department.id', function (err, res) {
 
       let t = new eTable;
 
@@ -353,18 +368,18 @@ const viewRoles = () => {
 //View all employees - verified
 const viewEmployees = () => {
   connection.query(
-    'SELECT * from employee LEFT JOIN role ON employee.role_id = role.id LEFT JOIN department ON role.department_id = department.id', function (err, res) {
+    'SELECT employee_DB.employee.id, employee_DB.employee.first_name, employee_DB.employee.last_name, employee_DB.role.title, employee_DB.department.name AS dept, employee_DB.role.salary, CONCAT(employee_DB.manager.first_name, " ", employee_DB.manager.last_name) AS manager FROM employee_DB.employee LEFT JOIN employee_DB.role on employee_DB.employee.role_id = employee_DB.role.id LEFT JOIN employee_DB.department on employee_DB.role.department_id = employee_DB.department.id LEFT JOIN employee_DB.employee manager on employee_DB.manager.id = employee_DB.employee.manager_id', function (err, res) {
 
       let t = new eTable;
 
-      res.forEach(function (employee) {
-        t.cell('ID', employee.id);
-        t.cell('First Name', employee.first_name);
-        t.cell('Last Name', employee.last_name);
-        t.cell('Role', employee.title);
-        t.cell('Department', employee.name);
-        t.cell('Salary', employee.salary);
-        t.cell('Manager ID', employee.manager_id);
+      res.forEach(function (person) {
+        t.cell('ID', person.id);
+        t.cell('First Name', person.first_name)
+        t.cell('Last Name', person.last_name);
+        t.cell('Role', person.title);
+        t.cell('Salary', person.salary);
+        t.cell('Department', person.dept);
+        t.cell('Manager', person.manager);
         t.newRow();
       });
 
@@ -491,6 +506,7 @@ const runRequest = () => {
   allDepartments();
   allRoles();
   allEmployees();
+  managerIdArray();
 
   inquirer
     .prompt({
