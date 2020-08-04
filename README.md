@@ -21,7 +21,8 @@ A CLI solution for managing a company's employees. Use the application to add an
 - Fork or clone the repository 
 - Navigate to the folder containing the repository and enter ```npm i``` into the command line to install dependencies
 - Create a .env file with your own passwords and information
-- To start , enter ```node server.js``` into the command line to launch the application
+- Create your databases in MySQL using the employeeDBSeed file or your own data.
+- To start the CLI, enter ```node server.js``` into the command line to launch the application
 
 ## Usage
 - This program is meant to help users track their organizational structure. 
