@@ -163,52 +163,105 @@ const getUpdatedEmployeeID = (answers) => {
   };
 };
 
-//Function to send employee updates to the server (Update employee function below) - verified
-const sendUpdatedEmployee = (query, data) => {
-    try{
-      connection.query(query, data, function(err, res){
-        if(err){
-          throw err;
-        }else{
-          console.log(infoStyle(`Success! The employee has been updated.`));
-          runRequest();
-        }
-      });
-    } catch(err) {
-        if(err){
-          throw err;
-      }
-    }; 
+//Get updated role's ID 
+const getUpdatedRoleID = (answers) => {
+  for(let role of roleObjArray){
+    if(role.title === answers.selectedRole){
+      thisRoleID = role.id;
+      return thisRoleID;
+    }
+  };
 };
 
+//Update Employee first name
+const updatedEmployeeFirstName = (query, data) => {
+  connection.query(
+    query, data, function(err, res){
+      console.log(infoStyle(`Success! The employee's first name has been updated.`));
+
+    }
+  )};
+
+//Update Employee last name
+const updatedEmployeeLastName = (query, data) => {
+  connection.query(
+    query, data, function(err, res){
+      console.log(infoStyle(`Success! The employee's last name has been updated.`));
+    }
+  )};
+
+//Update Employee role
+const updatedEmployeeRole = (query, data) => {
+  connection.query(
+    query, data, function(err, res){
+      console.log(infoStyle(`Success! The employee's role has been updated.`));
+    }
+  )};
+
+//Update Employee manager
+const updatedEmployeeManager = (query, data) => {
+  connection.query(
+    query, data, function(err, res){
+      console.log(infoStyle(`Success! The employee's manager has been updated.`));
+    }
+  )};
+
+  //Update Role title
+const updatedRoleTitle = (query, data) => {
+  connection.query(
+    query, data, function(err, res){
+      console.log(infoStyle(`Success! The role's title has been updated.`));
+    }
+  )};
+
+const updatedRoleSalary = (query, data) => {
+  connection.query(
+    query, data, function(err, res){
+      console.log(infoStyle(`Success! The role's salary has been updated.`));
+    }
+  )};
+ 
 //Update employee function - verified
 const uploadEmployeeUpdate = (data) => {
-  let updatedEmployeeObj = [];
-
-  let connectionQuery = 'UPDATE employee SET ';
+  
   if(data.updateFirstName){
-    updatedEmployeeObj.push(data.newFirstName);
-    connectionQuery += 'first_name = ? ';
+    connectionQuery = 'UPDATE employee SET first_name = ?  WHERE (id =  ' + thisEmployeeID + ');';
+    updatedEmployeeFirstName(connectionQuery, data.newFirstName);
   };
 
   if(data.updateLastName){
-    updatedEmployeeObj.push(data.newLastName);
-    connectionQuery += ', last_name = ? ';
+    connectionQuery = 'UPDATE employee SET last_name = ?  WHERE (id =  ' + thisEmployeeID + ');';
+    updatedEmployeeLastName(connectionQuery, data.newLastName);
   };
 
   if(data.updateRole){
-    updatedEmployeeObj.push(newRoleID);
-    connectionQuery += ', role_id = ? ';
+    connectionQuery = 'UPDATE employee SET role_id = ?  WHERE (id =  ' + thisEmployeeID + ');';
+    updatedEmployeeRole(connectionQuery);
   };
 
   if(data.updateManager){
-    updatedEmployeeObj.push(employeeManagerID);
-    connectionQuery += ', manager_id = ? ';
+    connectionQuery = 'UPDATE employee SET manager_id = ?  WHERE (id =  ' + thisEmployeeID + ');';
+    updatedEmployeeManager(connectionQuery);
   };
 
-  connectionQuery += ' WHERE (id =  ' + thisEmployeeID + ' );';
-  
-  sendUpdatedEmployee(connectionQuery, updatedEmployeeObj);
+  runRequest();
+
+};
+
+//Update role function
+const uploadRoleUpdate = (data) => {
+
+  if(data.updateRoleTitle){
+    connectionQuery = 'UPDATE role SET title = ? WHERE (id =  ' + thisRoleID + ' );';
+    updatedRoleTitle(connectionQuery, data.newRoleTitle);
+  };
+
+  if(data.updateRoleSalary){
+    connectionQuery = 'UPDATE role SET salary = ? WHERE (id =  ' + thisRoleID + ' );';
+    updatedRoleSalary(connectionQuery, data.newRoleSalary);
+  };
+
+  runRequest();
 };
 
 // ++++ ADD FUNCTIONS ++++
@@ -465,10 +518,45 @@ const updateEmployee = () => {
   });
 };
 
-//To revisit later
-// const updateRole = () => {
+//Update Role
+const updateRole = () => {
+  inquirer.prompt([
+    {
+      name: "updateRoleTitle",
+      type: "confirm",
+      message: "Would you like to update the role's title?"
+    },
+    {
+      name: "newRoleTitle",
+      type: "input",
+      message: "Please enter the role's new title",
+      when: function(answers){
+        return answers.updateRoleTitle;
+      }
+    },
+    {
+      name: "updateRoleSalary",
+      type: "confirm",
+      message: "Would you like to update the role's salary?"
+    },
+    {
+      name: "newRoleSalary",
+      type: "input",
+      message: "Please enter the role's new salary.",
+      when: function(answers){
+        return answers.updateRoleSalary;
+      }
+    }
+  ]).then(function (answers) {
+    if(answers.updateRoleTitle || answers.updateRoleSalary){
+      uploadRoleUpdate(answers);
+    } else {
+      console.log(infoStyle(`You haven't selected anything to change. Let's try again.`));
+      runRequest();
+    }
+  });
 
-// };
+};
 
 //-------------------------------------------------------------------------//
 /////////////////////////  INITIAL  FUNCTIONS  /////////////////////////
@@ -493,7 +581,7 @@ connection.connect(function (err) {
   ));
 
   //Inquirer prompts function - start
-  //Grab existing values from the DB
+  //Grab existing values from the DB and populate variables
   allDepartments();
   allRoles();
   allEmployees();
@@ -630,7 +718,7 @@ function updateInfo() {
         message: "What information would you like to update?",
         choices: [
             "Update employee",
-            //"Update role",
+            "Update role",
             "I changed my mind. Go back to the start"
           ]
           },
@@ -641,6 +729,15 @@ function updateInfo() {
             choices: employeeArray,
             when: function(answers){
               return answers.category === "Update employee"
+            }
+          },
+          {
+            name: "selectedRole",
+            type: "rawlist",
+            message: "Please select the role who you would like to update.",
+            choices: roleArray,
+            when: function(answers){
+              return answers.category === "Update role"
             }
           }
     ])
@@ -656,9 +753,12 @@ function updateInfo() {
           updateEmployee(thisEmployeeAnswers);
           break;
 
-        // case "Update role":
-        //   updateRole(thisEmployeeAnswers);
-        //   break;
+        case "Update role":
+          //get selected role ID
+          getUpdatedRoleID(thisEmployeeAnswers);
+          //run function to prompt user for desired updates
+          updateRole(thisEmployeeAnswers);
+          break;
 
         case "I changed my mind. Go back to the start":
           runRequest();
