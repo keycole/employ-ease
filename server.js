@@ -68,7 +68,7 @@ const allDepartments = () => {
 //Matches the department id to the role
 const getDeptID = (answers) => {
   for (let item of deptObjArray) {
-    if (item.name == answers.roleDepartment) {
+    if (item.name == answers.roleDepartment.trim()) {
       thisRoleID = item.id;
       return thisRoleID;
     }
@@ -110,7 +110,7 @@ const allEmployees = () => {
 //Matches the role id to the employee
 const getRoleID = (answers) => {
   for (let item of roleObjArray) {
-    if (item.title == answers.employeeDepartment) {
+    if (item.title == answers.employeeDepartment.trim()) {
       employeeRoleID = item.id;
       return employeeRoleID;
     }
@@ -119,8 +119,9 @@ const getRoleID = (answers) => {
 
 //Search for ID for updated employee Role
 const getEmployeeRoleID = (data) => {
-  for (let item of roleObjArray){
-    if(item.title === data.newRole){
+  for(let item of roleObjArray){
+    //if(item.title === data.newRoleTitle.trim()){
+      if(item.title === data.selectedRole.trim()){
       newRoleID = item.id;
       return newRoleID;
     }
@@ -130,7 +131,7 @@ const getEmployeeRoleID = (data) => {
 //Assigns a manager's employee id to an employee's manager_id
 const getManagerID = (answers) => {
   for (let item of employeeObjArray) {
-    let thisName = item.first_name + ' ' + item.last_name;
+    let thisName = item.first_name.trim() + ' ' + item.last_name.trim();
     if (thisName == answers.employeeManager) {
       employeeManagerID = item.id;
       return employeeManagerID;
@@ -165,8 +166,10 @@ const getUpdatedEmployeeID = (answers) => {
 
 //Get updated role's ID 
 const getUpdatedRoleID = (answers) => {
+  console.log(`Answers.selectedRole = ${answers.selectedRole}`);
+  console.log(`The roleObjArray = ${JSON.stringify(roleObjArray)}`);
   for(let role of roleObjArray){
-    if(role.title === answers.selectedRole){
+    if(role.title === answers.selectedRole.trim()){
       thisRoleID = role.id;
       return thisRoleID;
     }
@@ -177,8 +180,7 @@ const getUpdatedRoleID = (answers) => {
 const updatedEmployeeFirstName = (query, data) => {
   connection.query(
     query, data, function(err, res){
-      console.log(infoStyle(`Success! The employee's first name has been updated.`));
-
+      //console.log(infoStyle(`Success! The employee's first name has been updated.`));
     }
   )};
 
@@ -186,23 +188,23 @@ const updatedEmployeeFirstName = (query, data) => {
 const updatedEmployeeLastName = (query, data) => {
   connection.query(
     query, data, function(err, res){
-      console.log(infoStyle(`Success! The employee's last name has been updated.`));
+      //console.log(infoStyle(`Success! The employee's last name has been updated.`));
     }
   )};
 
 //Update Employee role
-const updatedEmployeeRole = (query, data) => {
+const updatedEmployeeRole = (query, employeeRoleID) => {
   connection.query(
-    query, data, function(err, res){
-      console.log(infoStyle(`Success! The employee's role has been updated.`));
+    query, employeeRoleID, function(err, res){
+      //console.log(infoStyle(`Success! The employee's role has been updated.`));
     }
   )};
 
 //Update Employee manager
-const updatedEmployeeManager = (query, data) => {
+const updatedEmployeeManager = (query, employeeManagerID) => {
   connection.query(
-    query, data, function(err, res){
-      console.log(infoStyle(`Success! The employee's manager has been updated.`));
+    query, employeeManagerID, function(err, res){
+      //console.log(infoStyle(`Success! The employee's manager has been updated.`));
     }
   )};
 
@@ -210,14 +212,14 @@ const updatedEmployeeManager = (query, data) => {
 const updatedRoleTitle = (query, data) => {
   connection.query(
     query, data, function(err, res){
-      console.log(infoStyle(`Success! The role's title has been updated.`));
+      //console.log(infoStyle(`Success! The role's title has been updated.`));
     }
   )};
 
 const updatedRoleSalary = (query, data) => {
   connection.query(
     query, data, function(err, res){
-      console.log(infoStyle(`Success! The role's salary has been updated.`));
+      //console.log(infoStyle(`Success! The role's salary has been updated.`));
     }
   )};
  
@@ -235,13 +237,18 @@ const uploadEmployeeUpdate = (data) => {
   };
 
   if(data.updateRole){
+    getUpdatedRoleID(data);
     connectionQuery = 'UPDATE employee SET role_id = ?  WHERE (id =  ' + thisEmployeeID + ');';
-    updatedEmployeeRole(connectionQuery);
+    console.log(`The employeeRoleID = ${thisRoleID}`);
+    console.log(`The updateRole query = $${connectionQuery}`);
+    updatedEmployeeRole(connectionQuery, thisRoleID);
   };
 
   if(data.updateManager){
     connectionQuery = 'UPDATE employee SET manager_id = ?  WHERE (id =  ' + thisEmployeeID + ');';
-    updatedEmployeeManager(connectionQuery);
+    console.log(`The employeeManagerID = ${employeeManagerID}`);
+    console.log(`The updateManager query = $${connectionQuery}`);
+    updatedEmployeeManager(connectionQuery, employeeManagerID);
   };
 
   runRequest();
@@ -253,7 +260,7 @@ const uploadRoleUpdate = (data) => {
 
   if(data.updateRoleTitle){
     connectionQuery = 'UPDATE role SET title = ? WHERE (id =  ' + thisRoleID + ' );';
-    updatedRoleTitle(connectionQuery, data.newRoleTitle);
+    updatedRoleTitle(connectionQuery, data.newRoleTitle.trim());
   };
 
   if(data.updateRoleSalary){
@@ -272,7 +279,7 @@ const addDepartment = () => {
     type: 'input',
     message: 'What is the name of the department that you would like to add?'
   }).then((answers) => {
-    connection.query("INSERT INTO department SET ?", { name: answers.newDepartment });
+    connection.query("INSERT INTO department SET ?", { name: answers.newDepartment.trim() });
     console.log(infoStyle(`Success! Your new department has been added to the database`));
     runRequest();
   });
@@ -304,7 +311,7 @@ const addRole = () => {
 
       connection.query('INSERT INTO role SET ?',
         {
-          title: answers.roleTitle,
+          title: answers.roleTitle.trim(),
           salary: answers.roleSalary,
           department_id: thisRoleID
         });
@@ -359,12 +366,14 @@ const addEmployee = () => {
 
         if (answers.hasManager) {
           getManagerID(answers);
+        } else { 
+          employeeManagerID = null;
         };
 
         connection.query('INSERT INTO employee SET ?',
           {
-            first_name: answers.newFirstName,
-            last_name: answers.newLastName,
+            first_name: answers.newFirstName.trim(),
+            last_name: answers.newLastName.trim(),
             role_id: employeeRoleID,
             manager_id: employeeManagerID
           });
@@ -479,7 +488,7 @@ const updateEmployee = () => {
       message: "Would you like to update the employee's role?"
     },
     {
-      name: "newRole",
+      name: "selectedRole",
       type: "rawlist",
       message: "Select the employee's new role from the list.",
       choices: roleArray,
@@ -503,6 +512,7 @@ const updateEmployee = () => {
     }
   ]).then(function (answers) {
     if(answers.updateRole && answers.updateManager){
+      console.log(`The answers are ${JSON.stringify(answers)}`);
       getEmployeeRoleID(answers);
       getManagerID(answers);
       uploadEmployeeUpdate(answers);
@@ -605,6 +615,7 @@ const runRequest = () => {
         "Add information",
         "View information",
         "Update information",
+        /*"Delete information",*/
         "Exit application"
       ]
     })
@@ -621,6 +632,10 @@ const runRequest = () => {
         case "Update information":
           updateInfo();
           break;
+
+        // case "Delete information"
+        //   deleteInfo();
+        //   break;
 
         case "Exit application":
           endApplication();
@@ -766,3 +781,7 @@ function updateInfo() {
       }
     });
 };
+
+// const deleteInfo = () => {
+
+// };
