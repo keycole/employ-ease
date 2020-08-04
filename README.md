@@ -12,7 +12,7 @@ A CLI solution for managing a company's employees. Use the application to add an
 
 ## Demo
 
-**Link to demo video:** https://drive.google.com/file/d/1t8czXmOMm3fXEDxvgvcbaQ8LSP3BKdl5/view
+**Link to demo video:** https://drive.google.com/file/d/1SM1Bj8pSJ-Wtxi5ia1JiEYq3PLGzkOgK/view
 
 
 ![Demo GIF](./assets/readmeImages/demo.gif)
