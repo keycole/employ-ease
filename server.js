@@ -22,7 +22,6 @@ let employeeObjArray = [];
 let employeeArray = [];
 let thisEmployeeID;
 let thisEmployeeAnswers = [];
-let updateEmployeeChoices = [];
 let newRoleID;
 
 //Create connection
@@ -238,7 +237,7 @@ const uploadEmployeeUpdate = (data) => {
     connectionQuery = 'UPDATE employee SET manager_id = ?  WHERE (id =  ' + thisEmployeeID + ');';
     updatedEmployeeManager(connectionQuery, employeeManagerID);
   };
-
+  console.log(infoStyle("Success! The employee has been updated."));
   runRequest();
 
 };
@@ -255,7 +254,7 @@ const uploadRoleUpdate = (data) => {
     connectionQuery = 'UPDATE role SET salary = ? WHERE (id =  ' + thisRoleID + ' );';
     updatedRoleSalary(connectionQuery, data.newRoleSalary);
   };
-
+  console.log(infoStyle("Success! The role has been updated."));
   runRequest();
 };
 
