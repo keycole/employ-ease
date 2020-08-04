@@ -166,8 +166,6 @@ const getUpdatedEmployeeID = (answers) => {
 
 //Get updated role's ID 
 const getUpdatedRoleID = (answers) => {
-  console.log(`Answers.selectedRole = ${answers.selectedRole}`);
-  console.log(`The roleObjArray = ${JSON.stringify(roleObjArray)}`);
   for(let role of roleObjArray){
     if(role.title === answers.selectedRole.trim()){
       thisRoleID = role.id;
@@ -180,7 +178,6 @@ const getUpdatedRoleID = (answers) => {
 const updatedEmployeeFirstName = (query, data) => {
   connection.query(
     query, data, function(err, res){
-      //console.log(infoStyle(`Success! The employee's first name has been updated.`));
     }
   )};
 
@@ -188,7 +185,6 @@ const updatedEmployeeFirstName = (query, data) => {
 const updatedEmployeeLastName = (query, data) => {
   connection.query(
     query, data, function(err, res){
-      //console.log(infoStyle(`Success! The employee's last name has been updated.`));
     }
   )};
 
@@ -196,7 +192,6 @@ const updatedEmployeeLastName = (query, data) => {
 const updatedEmployeeRole = (query, employeeRoleID) => {
   connection.query(
     query, employeeRoleID, function(err, res){
-      //console.log(infoStyle(`Success! The employee's role has been updated.`));
     }
   )};
 
@@ -204,7 +199,6 @@ const updatedEmployeeRole = (query, employeeRoleID) => {
 const updatedEmployeeManager = (query, employeeManagerID) => {
   connection.query(
     query, employeeManagerID, function(err, res){
-      //console.log(infoStyle(`Success! The employee's manager has been updated.`));
     }
   )};
 
@@ -212,14 +206,12 @@ const updatedEmployeeManager = (query, employeeManagerID) => {
 const updatedRoleTitle = (query, data) => {
   connection.query(
     query, data, function(err, res){
-      //console.log(infoStyle(`Success! The role's title has been updated.`));
     }
   )};
 
 const updatedRoleSalary = (query, data) => {
   connection.query(
     query, data, function(err, res){
-      //console.log(infoStyle(`Success! The role's salary has been updated.`));
     }
   )};
  
@@ -239,15 +231,11 @@ const uploadEmployeeUpdate = (data) => {
   if(data.updateRole){
     getUpdatedRoleID(data);
     connectionQuery = 'UPDATE employee SET role_id = ?  WHERE (id =  ' + thisEmployeeID + ');';
-    console.log(`The employeeRoleID = ${thisRoleID}`);
-    console.log(`The updateRole query = $${connectionQuery}`);
     updatedEmployeeRole(connectionQuery, thisRoleID);
   };
 
   if(data.updateManager){
     connectionQuery = 'UPDATE employee SET manager_id = ?  WHERE (id =  ' + thisEmployeeID + ');';
-    console.log(`The employeeManagerID = ${employeeManagerID}`);
-    console.log(`The updateManager query = $${connectionQuery}`);
     updatedEmployeeManager(connectionQuery, employeeManagerID);
   };
 
@@ -512,7 +500,6 @@ const updateEmployee = () => {
     }
   ]).then(function (answers) {
     if(answers.updateRole && answers.updateManager){
-      console.log(`The answers are ${JSON.stringify(answers)}`);
       getEmployeeRoleID(answers);
       getManagerID(answers);
       uploadEmployeeUpdate(answers);
@@ -522,6 +509,9 @@ const updateEmployee = () => {
     } else if(answers.updateManager){
       getManagerID(answers);
       uploadEmployeeUpdate(answers);
+    } else if(!answers.updateFirstName && !answers.updateLastName && !answers.updateRole && !answers.updateManager) {
+      console.log(infoStyle(`You haven't selected anything to change. Let's try again.`));
+      runRequest();
     } else {
       uploadEmployeeUpdate(answers);
     }
