@@ -26,9 +26,7 @@ let newRoleID;
 
 //Create connection
 const connection = mysql.createConnection({
-  host: 'localhost' || process.env.PORT,
-
-  port: process.env.PORT,
+  host: 'localhost',
 
   user: process.env.MYSQL_USER,
 
